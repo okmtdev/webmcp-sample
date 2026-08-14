@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useSyncExternalStore } from 'react';
-import { getServerState, getState, hydrateFromStorage, subscribe } from './domain/store';
-import type { AppState } from './domain/store';
+import { getServerState, getState, hydrateFromStorage, subscribe } from './store';
+import type { AppState } from './store';
 
 /** ストアを購読する。サーバ描画時は初期スナップショットを返すのでハイドレーション不一致が起きない。 */
 export function useAppState(): AppState {

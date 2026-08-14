@@ -1,9 +1,9 @@
 'use client';
 
-import { PERIODS, STATUS_LABELS, SYSTEM_TODAY, findEmployee } from '@/lib/domain/masters';
-import { computeTotals } from '@/lib/domain/rules';
-import { nextApprover, updateUi } from '@/lib/domain/store';
-import { useAppState } from '@/lib/hooks';
+import { PERIODS, STATUS_LABELS, SYSTEM_TODAY, findEmployee } from '@/lib/keihi/masters';
+import { computeTotals } from '@/lib/keihi/rules';
+import { nextApprover, updateUi } from '@/lib/keihi/store';
+import { useAppState } from '@/lib/keihi/hooks';
 
 export default function Dashboard() {
   const state = useAppState();
@@ -101,7 +101,7 @@ export default function Dashboard() {
             </tbody>
           </table>
           <div className="note" style={{ marginTop: 4 }}>
-            ※ どちらも同じ検証ロジック（src/lib/domain/rules.ts）を通ります。ツール側だけ甘くしているわけではありません。
+            ※ どちらも同じ検証ロジック（src/lib/keihi/rules.ts）を通ります。ツール側だけ甘くしているわけではありません。
           </div>
         </div>
       </div>

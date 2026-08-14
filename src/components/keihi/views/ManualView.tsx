@@ -14,8 +14,8 @@ import {
   SECTIONS,
   SYSTEM_TODAY,
   TAX_CATEGORY_LABELS,
-} from '@/lib/domain/masters';
-import { resetDemoData } from '@/lib/domain/store';
+} from '@/lib/keihi/masters';
+import { resetDemoData } from '@/lib/keihi/store';
 import Modal from '../Modal';
 
 const RULES: Array<[string, string]> = [

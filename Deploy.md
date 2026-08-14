@@ -1,9 +1,23 @@
 # デプロイ手順（GCP Cloud Storage）
 
-「スーパーややこしいシステム v.1.0.0」を GCP の Cloud Storage に静的ホスティングする手順です。
+WebMCP サンプルアプリケーションを GCP の Cloud Storage に静的ホスティングする手順です。
 
 このアプリはサーバを一切必要としません（`output: 'export'` による完全静的書き出し、永続化は `localStorage`）。
 バケットにファイルを置くだけで動きます。
+
+## ビルド成果物のルート構成
+
+`npm run build` は `out/` に次のファイルを出力します。
+
+| ルート | 出力ファイル | アプリ |
+| --- | --- | --- |
+| `/` | `out/index.html` | WebMCP サンプル SaaS 管理コンソール（MiiTel MCP） |
+| `/keihi` | `out/keihi/index.html` | スーパーややこしいシステム v.1.0.0 |
+| 404 | `out/404.html` | 共通のエラーページ |
+
+`next.config.mjs` で `trailingSlash: true` を指定しているため、
+ディレクトリ形式（`out/keihi/index.html`）で出力されます。
+この形が Cloud Storage の `MainPageSuffix` と相性が良いためです。
 
 ---
 
@@ -104,10 +118,17 @@ gcloud storage objects update "gs://${BUCKET}/**/*.html" \
 ### A-5. アクセスする
 
 ```
+# WebMCP サンプル SaaS 管理コンソール
 https://storage.googleapis.com/YOUR_BUCKET_NAME/index.html
+
+# スーパーややこしいシステム
+https://storage.googleapis.com/YOUR_BUCKET_NAME/keihi/index.html
 ```
 
-`index.html` まで明示してください。直接エンドポイントは `MainPageSuffix` を解決しません。
+**`index.html` まで明示してください。** 直接エンドポイントは `MainPageSuffix` を解決しないため、
+`.../YOUR_BUCKET_NAME/keihi/` のようにディレクトリで止めると 404 になります。
+アプリ内のリンク（ヘッダの「別デモへ」など）もディレクトリ形式のため、
+この方法ではリンク遷移が 404 になります。リンクを機能させたい場合は方法B を使ってください。
 
 ---
 
@@ -322,10 +343,15 @@ gcloud storage rm --recursive "gs://${BUCKET}"
 方法A で `NEXT_PUBLIC_BASE_PATH` を付け忘れています。`/BUCKET_NAME` を指定してビルドし直してください。
 逆に方法B で付けてしまった場合も同じ症状になります。
 
-**右上のバッジが「WebMCP: 内蔵」のままになる**
+**ヘッダのバッジが「MiiTel MCP 内蔵のみ」のままになる**
 1. HTTPS で開いているか確認してください（`http://` ではセキュアコンテキストになりません）。
-2. WebMCP ブリッジ拡張機能が有効か確認してください（README の「4. Claude から接続する」）。
+2. WebMCP ブリッジ拡張機能が有効か確認してください（README の「5. Claude から接続する」）。
 3. 拡張機能なしでも、画面右の「ツールを手動で試す」パネルからツールは実行できます。
+
+**`/keihi` が 404 になる**
+方法A（直接エンドポイント）ではディレクトリ URL が解決されません。
+`.../keihi/index.html` まで指定するか、方法B のロードバランサ経由で配信してください。
+方法B なら `--web-main-page-suffix=index.html` によって `/keihi/` がそのまま開けます。
 
 **再デプロイしても内容が変わらない**
 HTML に長いキャッシュが乗っています。A-4 のキャッシュ制御コマンドを実行し、
@@ -342,5 +368,6 @@ Uniform bucket-level access を有効にしたバケットに対して、
 IAM（`add-iam-policy-binding`）で付与してください。
 
 **入力したデータが消えた**
-データはブラウザの `localStorage`（キー `syys.v1`）にのみ保存されます。
+データはブラウザの `localStorage` にのみ保存されます
+（SaaS 管理コンソールは `wmsaas.v1`、経費システムは `syys.v1`）。
 別のブラウザ・シークレットウィンドウ・別ドメインとは共有されません。仕様です。

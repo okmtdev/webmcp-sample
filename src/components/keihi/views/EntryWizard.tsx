@@ -18,11 +18,11 @@ import {
   middlesOf,
   minorsOf,
   sectionsOf,
-} from '@/lib/domain/masters';
-import { bandRuleOf, computeTotals, emptyLine, validateRequest } from '@/lib/domain/rules';
-import { saveDraft, submitRequest, updateDraft, updateUi } from '@/lib/domain/store';
-import type { ExpenseLine, TaxCategory } from '@/lib/domain/types';
-import { useAppState } from '@/lib/hooks';
+} from '@/lib/keihi/masters';
+import { bandRuleOf, computeTotals, emptyLine, validateRequest } from '@/lib/keihi/rules';
+import { saveDraft, submitRequest, updateDraft, updateUi } from '@/lib/keihi/store';
+import type { ExpenseLine, TaxCategory } from '@/lib/keihi/types';
+import { useAppState } from '@/lib/keihi/hooks';
 import Modal from '../Modal';
 
 const STEP_TITLES = [

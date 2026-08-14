@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppState } from '@/lib/hooks';
 import { callRegisteredTool } from '@/lib/webmcp/registry';
 import type { WebMCPStatus } from '@/lib/webmcp/registry';
-import { useRegisteredTools } from '@/lib/webmcp/useWebMCP';
+import { useRegisteredTools, useToolLog } from '@/lib/webmcp/useWebMCP';
 
 /**
  * 右サイドの WebMCP パネル。
@@ -14,8 +13,8 @@ import { useRegisteredTools } from '@/lib/webmcp/useWebMCP';
  * - 拡張機能なしでも動作を確認できる手動実行フォーム
  */
 export default function AgentConsole({ status }: { status: WebMCPStatus }) {
-  const state = useAppState();
   const tools = useRegisteredTools();
+  const toolLog = useToolLog();
   const [selected, setSelected] = useState('get_system_manual');
   const [argsText, setArgsText] = useState('{}');
   const [output, setOutput] = useState('');
@@ -134,13 +133,13 @@ export default function AgentConsole({ status }: { status: WebMCPStatus }) {
           <span>ツール呼び出しログ</span>
         </div>
         <div className="console">
-          {state.log.length === 0 && (
+          {toolLog.length === 0 && (
             <span className="dim">
               まだ呼び出しはありません。{'\n'}
               エージェントがこのページのツールを呼ぶと、ここに 1 行ずつ流れます。
             </span>
           )}
-          {state.log.map((entry) => (
+          {toolLog.map((entry) => (
             <div key={entry.seq}>
               <span className="dim">[{entry.at.slice(11, 19)}]</span>{' '}
               <span className={entry.ok ? 'call' : 'err'}>{entry.tool}</span>{' '}

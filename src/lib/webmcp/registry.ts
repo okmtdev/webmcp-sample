@@ -1,40 +1,86 @@
-// ツール登録のラッパ。
+// ツール登録のラッパ。ルート直下の SaaS 管理画面と /keihi の経費システムで共用する。
 //
 // 目的:
 //   1. 実装差異（signal の渡し方、解除方法）を吸収する
-//   2. ページ自身が「何を登録したか」を保持し、画面内のエージェントコンソールから
-//      同じ execute を呼べるようにする（拡張機能がなくてもチュートリアルが成立する）
+//   2. ページ自身が「何を登録したか」を保持し、画面内のパネルから同じ execute を呼べるようにする
+//      （ブリッジ拡張機能がなくてもチュートリアルが成立する）
+//   3. ツール呼び出しのログを持ち、エージェントの動きを画面に見せる
 
-import { appendLog } from '../domain/store';
 import { ensureModelContext, getBackend, getModelContext } from './polyfill';
 import type { Backend } from './polyfill';
 import type { ToolDescriptor, ToolResult } from './types';
 
-/** ページが登録したツールのミラー。画面内コンソールはこちらを参照する。 */
+// ---- 登録済みツールのミラー -------------------------------------------------
+
+/** 未登録時に返す不変の空配列。サーバ描画時のスナップショットと同一実体にしておく。 */
+export const NO_TOOLS: ToolDescriptor[] = [];
+
 const mirror = new Map<string, ToolDescriptor>();
 const mirrorListeners = new Set<() => void>();
+let cachedList: ToolDescriptor[] = NO_TOOLS;
 
 function emitMirror() {
   for (const l of mirrorListeners) l();
 }
 
-export function subscribeMirror(listener: () => void): () => void {
-  mirrorListeners.add(listener);
-  return () => mirrorListeners.delete(listener);
+function refreshCache() {
+  cachedList = mirror.size === 0 ? NO_TOOLS : [...mirror.values()];
 }
 
-/** 未登録時に返す不変の空配列。サーバ描画時のスナップショットと同一実体にしておく。 */
-export const NO_TOOLS: ToolDescriptor[] = [];
-
-let cachedList: ToolDescriptor[] = NO_TOOLS;
+export function subscribeMirror(listener: () => void): () => void {
+  mirrorListeners.add(listener);
+  return () => {
+    mirrorListeners.delete(listener);
+  };
+}
 
 export function getRegisteredTools(): ToolDescriptor[] {
   return cachedList;
 }
 
-function refreshCache() {
-  cachedList = [...mirror.values()];
+// ---- ツール呼び出しログ -----------------------------------------------------
+
+export interface ToolCallLogEntry {
+  seq: number;
+  at: string;
+  tool: string;
+  args: unknown;
+  ok: boolean;
+  summary: string;
 }
+
+export const NO_LOG: ToolCallLogEntry[] = [];
+
+const logListeners = new Set<() => void>();
+let log: ToolCallLogEntry[] = NO_LOG;
+let logSeq = 1;
+
+export function subscribeToolLog(listener: () => void): () => void {
+  logListeners.add(listener);
+  return () => {
+    logListeners.delete(listener);
+  };
+}
+
+export function getToolLog(): ToolCallLogEntry[] {
+  return log;
+}
+
+export function getServerToolLog(): ToolCallLogEntry[] {
+  return NO_LOG;
+}
+
+export function clearToolLog(): void {
+  log = NO_LOG;
+  for (const l of logListeners) l();
+}
+
+function appendLog(entry: Omit<ToolCallLogEntry, 'seq' | 'at'>) {
+  log = [{ ...entry, seq: logSeq++, at: new Date().toISOString() }, ...log].slice(0, 60);
+  for (const l of logListeners) l();
+}
+
+// ---- 結果ヘルパー -----------------------------------------------------------
 
 export function textResult(text: string, structured?: unknown): ToolResult {
   return structured === undefined
@@ -45,6 +91,8 @@ export function textResult(text: string, structured?: unknown): ToolResult {
 export function errorResult(text: string): ToolResult {
   return { content: [{ type: 'text', text }], isError: true };
 }
+
+// ---- 登録 -------------------------------------------------------------------
 
 /** ツール呼び出しをログに残しつつ実行するラッパを被せる。 */
 function withLogging(tool: ToolDescriptor): ToolDescriptor {
@@ -119,12 +167,14 @@ export function registerTools(tools: ToolDescriptor[], signal: AbortSignal): voi
   for (const t of tools) registerTool(t, signal);
 }
 
-/** 画面内のエージェントコンソールからツールを実行する。 */
+/** 画面内のパネルからツールを実行する。 */
 export async function callRegisteredTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
   const tool = mirror.get(name);
   if (!tool) return errorResult(`ツール ${name} は登録されていません。`);
   return await tool.execute(args);
 }
+
+// ---- 状態 -------------------------------------------------------------------
 
 export interface WebMCPStatus {
   backend: Backend;
@@ -154,7 +204,7 @@ export function getStatus(): WebMCPStatus {
         backend,
         label: '内蔵フォールバックで動作中',
         detail:
-          'ブラウザに WebMCP 実装が見つからなかったため、ページ内蔵の最小実装を使っています。画面内のエージェントコンソールからは試せますが、外部エージェントからは接続できません。拡張機能を入れるか対応ブラウザで開いてください。',
+          'ブラウザに WebMCP 実装が見つからなかったため、ページ内蔵の最小実装を使っています。画面内のパネルからは試せますが、外部エージェントからは接続できません。拡張機能を入れるか対応ブラウザで開いてください。',
         toolCount,
       };
     default:
