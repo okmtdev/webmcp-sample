@@ -23,8 +23,8 @@ import {
   TAX_CATEGORY_LABELS,
   describeDeptPath,
   findEmployee,
-} from '../domain/masters';
-import { autoComputeLine, computeTotals, deriveRoute, validateRequest } from '../domain/rules';
+} from './masters';
+import { autoComputeLine, computeTotals, deriveRoute, validateRequest } from './rules';
 import {
   approveRequest,
   createRequest,
@@ -38,9 +38,9 @@ import {
   runMonthEndClose,
   submitRequest,
   updateUi,
-} from '../domain/store';
-import type { ViewName } from '../domain/store';
-import type { AttachmentB, ExpenseLine, ExpenseRequest, RuleViolation } from '../domain/types';
+} from './store';
+import type { ViewName } from './store';
+import type { AttachmentB, ExpenseLine, ExpenseRequest, RuleViolation } from './types';
 import { errorResult, textResult } from '../webmcp/registry';
 import type { ToolDescriptor } from '../webmcp/types';
 

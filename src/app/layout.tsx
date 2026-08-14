@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'スーパーややこしいシステム v.1.0.0',
+  title: 'WebMCP サンプル SaaS 管理コンソール',
   description:
-    'WebMCP のチュートリアル用サンプル。画面から手作業でやると地獄のような経費精算ワークフローを、エージェントからは1文で片付けられるようにする。',
+    '1件ずつしかユーザーを追加できない SaaS 管理画面に MiiTel MCP を定義し、ユーザーごとの設定を一括で片付けられることを体験する WebMCP のサンプル。',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

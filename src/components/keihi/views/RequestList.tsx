@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { STATUS_LABELS, findEmployee } from '@/lib/domain/masters';
-import { computeTotals, validateRequest } from '@/lib/domain/rules';
-import { deleteRequest, loadDraftFromRequest, nextApprover, updateUi } from '@/lib/domain/store';
-import { useAppState } from '@/lib/hooks';
+import { STATUS_LABELS, findEmployee } from '@/lib/keihi/masters';
+import { computeTotals, validateRequest } from '@/lib/keihi/rules';
+import { deleteRequest, loadDraftFromRequest, nextApprover, updateUi } from '@/lib/keihi/store';
+import { useAppState } from '@/lib/keihi/hooks';
 import Modal from '../Modal';
 
 const PAGE_SIZE = 3;

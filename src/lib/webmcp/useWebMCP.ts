@@ -1,16 +1,28 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { ALL_TOOLS } from '../tools';
-import { NO_TOOLS, getRegisteredTools, getStatus, initWebMCP, registerTools, subscribeMirror } from './registry';
-import type { WebMCPStatus } from './registry';
+import {
+  NO_LOG,
+  NO_TOOLS,
+  getRegisteredTools,
+  getServerToolLog,
+  getStatus,
+  getToolLog,
+  initWebMCP,
+  registerTools,
+  subscribeMirror,
+  subscribeToolLog,
+} from './registry';
+import type { ToolCallLogEntry, WebMCPStatus } from './registry';
 import type { ToolDescriptor } from './types';
 
 /**
- * ページのツールを WebMCP に登録する。
+ * 渡されたツール一覧を WebMCP に登録する。
  * 解除は AbortSignal 経由（仕様上の正しい解除方法）。
+ *
+ * tools はモジュールスコープの定数を渡すこと（毎レンダリングで新しい配列を作らない）。
  */
-export function useWebMCPRegistration(): WebMCPStatus {
+export function useWebMCPRegistration(tools: ToolDescriptor[]): WebMCPStatus {
   const [status, setStatus] = useState<WebMCPStatus>({
     backend: 'unavailable',
     label: '検出中…',
@@ -21,16 +33,23 @@ export function useWebMCPRegistration(): WebMCPStatus {
   useEffect(() => {
     initWebMCP();
     const controller = new AbortController();
-    registerTools(ALL_TOOLS, controller.signal);
+    registerTools(tools, controller.signal);
     setStatus(getStatus());
     return () => controller.abort();
-  }, []);
+  }, [tools]);
 
-  const tools = useRegisteredTools();
-  return { ...status, toolCount: tools.length };
+  const registered = useRegisteredTools();
+  return { ...status, toolCount: registered.length };
 }
 
-/** ページが登録済みのツール一覧（画面内コンソール用のミラー）。 */
+/** ページが登録済みのツール一覧（画面内パネル用のミラー）。 */
 export function useRegisteredTools(): ToolDescriptor[] {
   return useSyncExternalStore(subscribeMirror, getRegisteredTools, () => NO_TOOLS);
 }
+
+/** ツール呼び出しのライブログ。新しいものが先頭。 */
+export function useToolLog(): ToolCallLogEntry[] {
+  return useSyncExternalStore(subscribeToolLog, getToolLog, getServerToolLog);
+}
+
+export { NO_LOG };

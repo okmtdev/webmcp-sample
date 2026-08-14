@@ -1,11 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { SYSTEM_TODAY, describeDeptPath, findEmployee } from '@/lib/domain/masters';
-import { computeTotals } from '@/lib/domain/rules';
-import { nextApprover, updateUi } from '@/lib/domain/store';
-import type { ViewName } from '@/lib/domain/store';
-import { useAppState, useHydration } from '@/lib/hooks';
+import Link from 'next/link';
+import { SYSTEM_TODAY, describeDeptPath, findEmployee } from '@/lib/keihi/masters';
+import { computeTotals } from '@/lib/keihi/rules';
+import { nextApprover, updateUi } from '@/lib/keihi/store';
+import type { ViewName } from '@/lib/keihi/store';
+import { useAppState, useHydration } from '@/lib/keihi/hooks';
+import { ALL_TOOLS } from '@/lib/keihi/tools';
 import { useWebMCPRegistration } from '@/lib/webmcp/useWebMCP';
 import AgentConsole from './AgentConsole';
 import Modal from './Modal';
@@ -59,7 +61,7 @@ const TREE: Array<{ label: string; view: ViewName; depth: number }> = [
 export default function App() {
   useHydration();
   const state = useAppState();
-  const webmcp = useWebMCPRegistration();
+  const webmcp = useWebMCPRegistration(ALL_TOOLS);
   const [helpOpen, setHelpOpen] = useState(false);
 
   const view = state.ui.view;
@@ -103,6 +105,9 @@ export default function App() {
           <span className="note" style={{ padding: '2px 6px' }}>
             接続先: <b className="mono">LOCALSTORAGE/PROD1</b> ／ 端末: <b className="mono">WS-0413</b>
           </span>
+          <Link href="/" className="note" style={{ padding: '2px 6px', color: 'var(--link)' }}>
+            ◀ WebMCP サンプル SaaS へ
+          </Link>
         </div>
 
         <div className="ticker" aria-hidden="true">

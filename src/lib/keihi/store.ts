@@ -50,22 +50,11 @@ export interface UiState {
   innerTab: 'a1' | 'a2' | 'a3';
 }
 
-export interface ToolLogEntry {
-  seq: number;
-  at: string;
-  tool: string;
-  args: unknown;
-  ok: boolean;
-  summary: string;
-}
-
 export interface AppState {
   requests: ExpenseRequest[];
   seq: number;
   draft: DraftState;
   ui: UiState;
-  log: ToolLogEntry[];
-  logSeq: number;
   hydrated: boolean;
 }
 
@@ -190,8 +179,6 @@ function initialState(): AppState {
       outerTab: 'A',
       innerTab: 'a1',
     },
-    log: [],
-    logSeq: 1,
     hydrated: false,
   };
 }
@@ -284,19 +271,6 @@ export function hydrateFromStorage() {
       }
     : { ...base, hydrated: true };
   emit();
-}
-
-// ---- ログ -------------------------------------------------------------------
-
-export function appendLog(entry: Omit<ToolLogEntry, 'seq' | 'at'>) {
-  setState(
-    (s) => ({
-      ...s,
-      logSeq: s.logSeq + 1,
-      log: [{ ...entry, seq: s.logSeq, at: new Date().toISOString() }, ...s.log].slice(0, 60),
-    }),
-    false,
-  );
 }
 
 // ---- 申請の CRUD / 状態遷移 -------------------------------------------------

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { DEFAULT_PERIOD, PERIODS, STATUS_LABELS } from '@/lib/domain/masters';
-import { computeTotals } from '@/lib/domain/rules';
-import { runMonthEndClose } from '@/lib/domain/store';
-import type { CloseResult } from '@/lib/domain/store';
-import { useAppState } from '@/lib/hooks';
+import { DEFAULT_PERIOD, PERIODS, STATUS_LABELS } from '@/lib/keihi/masters';
+import { computeTotals } from '@/lib/keihi/rules';
+import { runMonthEndClose } from '@/lib/keihi/store';
+import type { CloseResult } from '@/lib/keihi/store';
+import { useAppState } from '@/lib/keihi/hooks';
 import Modal from '../Modal';
 
 export default function CloseView() {

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ROLE_LABELS, STATUS_LABELS, describeDeptPath, findEmployee } from '@/lib/domain/masters';
-import { computeTotals } from '@/lib/domain/rules';
-import { approveRequest, nextApprover, updateUi } from '@/lib/domain/store';
-import { useAppState } from '@/lib/hooks';
+import { ROLE_LABELS, STATUS_LABELS, describeDeptPath, findEmployee } from '@/lib/keihi/masters';
+import { computeTotals } from '@/lib/keihi/rules';
+import { approveRequest, nextApprover, updateUi } from '@/lib/keihi/store';
+import { useAppState } from '@/lib/keihi/hooks';
 import Modal from '../Modal';
 
 export default function ApprovalView() {
